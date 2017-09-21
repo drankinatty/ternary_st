@@ -575,20 +575,21 @@ void *tst_search_prefix (const node_tst *root, const char *s,
     for (; *start; start++) {}              /* get length of s */
     const size_t nchr = start - s;
 
-    start = s;
-    *n = 0;
+    start = s;  /* reset start to s */
+    *n = 0;     /* initialize n - 0 */
 
     /* Loop while we haven't hit a NULL node or returned */
     while (curr) {
 
         int diff = *s - curr->key;          /* calculate the difference */
         if (diff == 0) {                    /* handle the equal case */
-
+            /* check if prefix number of chars reached */
             if ((size_t)(s - start) == nchr - 1) {
+                /* call tst_suggest to fill a with pointer to matching words */
                 tst_suggest (curr, curr->key, nchr, a, n, max);
                 return (void*)curr;
             }
-            if (*s == 0)
+            if (*s == 0)    /* no matching prefix found in tree */
                 return (void *)curr->eqkid;
 
             s++;
@@ -606,11 +607,13 @@ void *tst_search_prefix (const node_tst *root, const char *s,
 void print_word (const void *node, void *data)
 {
     printf ("%s\n", (char *)((node_tst *)node)->eqkid);
-    if (data) {}
+
+    if (data) {} /* suppress warning, data unused in print */
 }
 
 /** tst_traverse_fn(), traverse tree calling 'fn' on each word.
- *  prototype for 'fn' is void fn(const char *).
+ *  prototype for 'fn' is void fn(const void *, void *). data can
+ *  be NULL if unused.
  */
 void tst_traverse_fn (const node_tst *p, void(fn)(const void *, void *), void *data)
 {

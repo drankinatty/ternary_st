@@ -49,9 +49,11 @@ void *tst_search_prefix (const node_tst *root, const char *s,
 /** print_word(), function for tst_traverse_fn, print each word. */
 void print_word (const void *node, void *data);
 
-/** tst_traverse_fn(), traverse tree calling 'fn' on each word */
+/** tst_traverse_fn(), traverse tree calling 'fn' on each word.
+ *  prototype for 'fn' is void fn(const void *, void *). data can
+ *  be NULL if unused.
+ */
 void tst_traverse_fn (const node_tst *p, void(fn)(const void *, void *), void *data);
-// void tst_traverse_fn (const node_tst *p, void(fn)(const void *, void *));
 
 /** free the ternary search tree rooted at p, data storage internal. */
 void tst_free_all (node_tst *p);
