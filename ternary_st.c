@@ -47,6 +47,8 @@ static void *tst_stack_pop (tst_stack *s)
  *  the node is deleted. root node updated if changed. returns NULL
  *  on success (deleted), otherwise returns the address of victim
  *  if refcnt non-zero.
+ *  TODO - combine tst_del_word() and tst_del_ref() into single function
+ *         passing flag to control free of data if not external reference.
  */
 static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk)
 {
@@ -74,8 +76,10 @@ static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk)
         }
 
         /* check if victim is prefix for others (victim has lo/hi node).
-         * if both lo & hi children, find highest node under low with
-         * children and make parent->eqkid equal highest, free victim.
+         * if both lo & hi children, check if lokid->hikid present, if not,
+         * move hikid to lokid->hikid, replace node with lokid and free node.
+         * if lokid->hikid present, check hikid->lokid. If not present, then
+         * move lokid to hikid->lokid, replace node with hikid free node.
          */
         if (victim->lokid && victim->hikid) {   /* victim has both lokid/hikid */
             if (!victim->lokid->hikid) {        /* check for hikid in lo tree */
@@ -235,9 +239,11 @@ static void *tst_del_ref (node_tst **root, node_tst *node, tst_stack *stk)
         }
 
     /* check if victim is prefix for others (victim has lo/hi node).
-        * if both lo & hi children, find highest node under low with
-        * children and make parent->eqkid equal highest, free victim.
-        */
+     * if both lo & hi children, check if lokid->hikid present, if not,
+     * move hikid to lokid->hikid, replace node with lokid and free node.
+     * if lokid->hikid present, check hikid->lokid. If not present, then
+     * move lokid to hikid->lokid, replace node with hikid free node.
+     */
     if (victim->lokid && victim->hikid) {   /* victim has both lokid/hikid */
         if (!victim->lokid->hikid) {        /* check for hikid in lo tree */
             /* rotate victim->hikid to victim->lokid->hikid, and
