@@ -1,5 +1,4 @@
-#ternary_st
-Ternary Search Tree for Prefix-Search
+**Ternary Search Tree for Prefix-Search**
 
 Copyright David C. Rankin, J.D.,P.E. 2017
 
@@ -87,5 +86,64 @@ Compilation with full error checking and optimization is suggested, e.g.
 
     $ gcc -Wall -Wextra -pedantic -Wshadow -finline-functions -std=gnu11 -Ofast \
       ternary_st.c -o bin/ternary_st_val ternary_st_val.c
+
+The benefit of a ternary tree for prefix searching of text lies in its ability to quickly traverse a tree of any size finding the node containing the last character in the wanted prefix. An in-order traversal of that node identifies all strings in the tree containing the prefix. For example, in the `words1000.txt` file, you can locate all words beginning with `abr` near instantaneously, e.g.
+
+    $ ./bin/tst_test_cpy words1000.txt
+    ternary_tree, loaded 1000 words in 0.001965 sec
+
+     p  print words in tree
+     a  add word to the tree
+     f  find word in tree
+     s  search words matching prefix (enter 3 chars)
+     d  delete word from the tree
+     q  quit, freeing all data
+
+    choice: s
+    find words matching prefix (3 chars): abr
+      abr - searched prefix in 0.000008 sec
+
+    suggest[0] : abrade
+    suggest[1] : abrasion
+    suggest[2] : abrasive
+    suggest[3] : abreact
+    suggest[4] : abreast
+    suggest[5] : abridge
+    suggest[6] : abridgment
+    suggest[7] : abroad
+    suggest[8] : abrogate
+    suggest[9] : abrupt
+
+The search and prefix search times remain fast as the size of the tree increases. For example, adding all 249092 word from `/usr/share/dict/words` (not containing apostrophes), while there are eight times as many words with the `abr` prefix, the time to acquire an array of pointers to all prefixed words increases only slightly, e.g.
+
+    $ ./bin/tst_test_cpy dat/words
+    ternary_tree, loaded 249092 words in 0.186725 sec
+
+     p  print words in tree
+     a  add word to the tree
+     f  find word in tree
+     s  search words matching prefix (enter 3 chars)
+     d  delete word from the tree
+     q  quit, freeing all data
+
+    choice: s
+    find words matching prefix (3 chars): abr
+      abr - searched prefix in 0.000051 sec
+
+    suggest[0] : abrégé
+    suggest[1] : abr
+    suggest[2] : abracadabra
+    suggest[3] : abrachia
+    suggest[4] : abradable
+    suggest[5] : abradant
+    suggest[6] : abrade
+    <snip>
+    suggest[67] : abrupter
+    suggest[68] : abruptest
+    suggest[69] : abruption
+    suggest[70] : abruptly
+    suggest[71] : abruptness
+    suggest[72] : abruptnesses
+
 
 If you find any problems, let me know (or better yet provide a patch).
