@@ -1,7 +1,10 @@
+#ternary_st
 Ternary Search Tree for Prefix-Search
 
 Copyright David C. Rankin, J.D.,P.E. 2017
+
 Licensed Under GPLv2 availabe here
+
 https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
 A *ternary search tree (tst)* is a binary search tree (bst) with an additional node pointer.
