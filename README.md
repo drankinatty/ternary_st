@@ -85,7 +85,7 @@ The final file `tst_validate.c` is a short torture test fully exercising and val
 
 Compilation with full error checking and optimization is suggested, e.g.
 
-  $ gcc -Wall -Wextra -pedantic -Wshadow -finline-functions -std=gnu11 -Ofast \
-    ternary_st.c -o bin/ternary_st_val ternary_st_val.c
+    $ gcc -Wall -Wextra -pedantic -Wshadow -finline-functions -std=gnu11 -Ofast \
+      ternary_st.c -o bin/ternary_st_val ternary_st_val.c
 
 If you find any problems, let me know (or better yet provide a patch).
