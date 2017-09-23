@@ -39,7 +39,7 @@ The data (a pointer to a word, or a copy of the word itself) is stored in an add
                           ----+----
                           |   |   |    note: any of the lokid or hikid nodes
                               o              can also have pointers to nodes
-                              |-t            for words that "cat" of "ca" is
+                              |-t            for words that "cat" or "ca" is
                               |-0            a partial prefix to.
                           ----+----
                           |   |   |

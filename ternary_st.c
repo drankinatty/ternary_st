@@ -44,19 +44,20 @@ static void *tst_stack_pop (tst_stack *s)
 /** delete current data-node and parent, update 'node' to new parent.
  *  before delete the current refcnt is checked, if non-zero, occurrences
  *  of the word remain in buffer the node is not deleted, if refcnt zero,
- *  the node is deleted. root node updated if changed. returns NULL
- *  on success (deleted), otherwise returns the address of victim
+ *  the node is deleted. if 'freeword = 1' the copy of word allocated and
+ *  stored as the node->eqkid is freed, if 'freeword = 0', node->eqkid is
+ *  stored elsewhere and not freed, root node updated if changed. returns
+ *  NULL on success (deleted), otherwise returns the address of victim
  *  if refcnt non-zero.
- *  TODO - combine tst_del_word() and tst_del_ref() into single function
- *         passing flag to control free of data if not external reference.
  */
-static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk)
+static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk,
+                            int freeword)
 {
     node_tst *victim = node,            /* begin deletion w/victim */
              *parent = tst_stack_pop (stk); /* parent to victim */
 
     if (!victim->refcnt) {              /* if last occurrence */
-        if (!victim->key)               /* check key is nul   */
+        if (!victim->key && freeword)   /* check key is nul   */
             free (victim->eqkid);       /* free string (data) */
 
         /* remove unique suffix chain - parent & victim nodes
@@ -213,165 +214,6 @@ static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk)
     return victim;  /* return NULL on successful free, *node otherwise */
 }
 
-/** delete all nodes in 'node' chain, update 'node' to new parent.
- *  root node updated if changed. returns NULL on success (deleted),
- *  otherwise returns the address of victim.
- */
-static void *tst_del_ref (node_tst **root, node_tst *node, tst_stack *stk)
-{
-    node_tst *victim = node,            /* begin deletion w/victim */
-             *parent = tst_stack_pop (stk); /* parent to victim */
-
-        /* remove unique suffix chain - parent & victim nodes
-         * have no children. simple remove until the first parent
-         * found with children.
-         */
-        while (!parent->lokid && !parent->hikid &&
-               !victim->lokid && !victim->hikid) {
-            parent->eqkid = NULL;
-            free (victim);
-            victim = parent;
-            parent = tst_stack_pop (stk);
-            if (!parent) {              /* last word & root node */
-                free (victim);
-                return (void*)(*root = NULL);
-            }
-        }
-
-    /* check if victim is prefix for others (victim has lo/hi node).
-     * if both lo & hi children, check if lokid->hikid present, if not,
-     * move hikid to lokid->hikid, replace node with lokid and free node.
-     * if lokid->hikid present, check hikid->lokid. If not present, then
-     * move lokid to hikid->lokid, replace node with hikid free node.
-     */
-    if (victim->lokid && victim->hikid) {   /* victim has both lokid/hikid */
-        if (!victim->lokid->hikid) {        /* check for hikid in lo tree */
-            /* rotate victim->hikid to victim->lokid->hikid, and
-                * rotate victim->lokid to place of victim.
-                */
-            victim->lokid->hikid = victim->hikid;
-            if (!parent)
-                *root = victim->lokid;
-            else if (victim == parent->lokid)
-                parent->lokid = victim->lokid;
-            else if (victim == parent->hikid)
-                parent->hikid = victim->lokid;
-            else
-                parent->eqkid = victim->lokid;
-            free (victim);
-            victim = NULL;
-        }
-        else if (!victim->hikid->lokid) {   /* check for lokid in hi tree */
-            /* opposite rotation */
-            victim->hikid->lokid = victim->lokid;
-            if (!parent)
-                *root = victim->hikid;
-            else if (victim == parent->lokid)
-                parent->lokid = victim->hikid;
-            else if (victim == parent->hikid)
-                parent->hikid = victim->hikid;
-            else
-                parent->eqkid = victim->hikid;
-            free (victim);
-            victim = NULL;
-        }
-        else    /* can't rotate, return, leaving victim->eqkid NULL */
-            return NULL;
-    }
-    else if (victim->lokid) {   /* only lokid, replace victim with lokid */
-        parent->eqkid = victim->lokid;
-        free (victim);
-        victim = NULL;
-    }
-    else if (victim->hikid) {   /* only hikid, replace victim with hikid */
-        parent->eqkid = victim->hikid;
-        free (victim);
-        victim = NULL;
-    }
-    else {  /* victim - no children, but parent has other children */
-        if (victim == parent->lokid) {      /* if parent->lokid - trim */
-            parent->lokid = NULL;
-            free (victim);
-            victim = NULL;
-        }
-        else if (victim == parent->hikid) { /* if parent->hikid - trim */
-            parent->hikid = NULL;
-            free (victim);
-            victim = NULL;
-        }
-        else {  /* victim was parent->eqkid, but parent->lo/hikid exists */
-            parent->eqkid = NULL;               /* set eqkid NULL */
-            free (victim);                      /* free current victim */
-            victim = parent;                    /* set parent = victim */
-            parent = tst_stack_pop (stk);       /* get new parent */
-            /* if both victim hi/lokid are present */
-            if (victim->lokid && victim->hikid) {
-                /* same checks and rotations as above */
-                if (!victim->lokid->hikid) {
-                    victim->lokid->hikid = victim->hikid;
-                    if (!parent)
-                        *root = victim->lokid;
-                    else if (victim == parent->lokid)
-                        parent->lokid = victim->lokid;
-                    else if (victim == parent->hikid)
-                        parent->hikid = victim->lokid;
-                    else
-                        parent->eqkid = victim->lokid;
-                    free (victim);
-                    victim = NULL;
-                }
-                else if (!victim->hikid->lokid) {
-                    victim->hikid->lokid = victim->lokid;
-                    if (!parent)
-                        *root = victim->hikid;
-                    else if (victim == parent->lokid)
-                        parent->lokid = victim->hikid;
-                    else if (victim == parent->hikid)
-                        parent->hikid = victim->hikid;
-                    else
-                        parent->eqkid = victim->hikid;
-                    free (victim);
-                    victim = NULL;
-                }
-                else
-                    return NULL;
-            }
-            /* if only lokid, rewire to parent */
-            else if (victim->lokid) {
-                if (parent) {   /* if parent exists, rewire */
-                    if (victim == parent->lokid)
-                        parent->lokid = victim->lokid;
-                    else if (victim == parent->hikid)
-                        parent->hikid = victim->lokid;
-                    else
-                        parent->eqkid = victim->lokid;
-                }
-                else            /* we are new root node, update root */
-                    *root = victim->lokid;  /* make last node root */
-                free (victim);
-                victim = NULL;
-            }
-            /* if only hikid, rewire to parent */
-            else if (victim->hikid) {
-                if (parent) {   /* if parent exists, rewire */
-                    if (victim == parent->lokid)
-                        parent->lokid = victim->hikid;
-                    else if (victim == parent->hikid)
-                        parent->hikid = victim->hikid;
-                    else
-                        parent->eqkid = victim->hikid;
-                }
-                else            /* we are new root node, update root */
-                    *root = victim->hikid;  /* make last node root */
-                free (victim);
-                victim = NULL;
-            }
-        }
-    }
-
-    return victim;  /* return NULL on successful free, *node otherwise */
-}
-
 /** tst_ins_del_cpy() insert or remove copy of 's' from ternary search tree.
  *  insert all nodes required for 's' in tree, with allocation for storage
  *  of 's' at eqkid node of leaf. increment refcnt, if 's' already exists
@@ -399,7 +241,7 @@ void *tst_ins_del_cpy (node_tst **root, const char *s, const int del)
                 if (del) {                  /* delete instead of insert   */
                     (curr->refcnt)--;       /* decrement reference count  */
                     /* chk refcnt, del 's', return NULL on successful del */
-                    return tst_del_word (root, curr, &stk);
+                    return tst_del_word (root, curr, &stk, 1);
                 }
                 else
                     curr->refcnt++;         /* increment refcnt if word exists */
@@ -473,7 +315,7 @@ void *tst_ins_del_ref (node_tst **root, char * const *s, const int del)
                 if (del) {                  /* delete instead of insert   */
                     (curr->refcnt)--;       /* decrement reference count  */
                     /* chk refcnt, del 's', return NULL on successful del */
-                    return tst_del_ref (root, curr, &stk);
+                    return tst_del_word (root, curr, &stk, 0);
                 }
                 else
                     curr->refcnt++;         /* increment refcnt if word exists */
