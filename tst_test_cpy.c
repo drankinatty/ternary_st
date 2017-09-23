@@ -7,6 +7,8 @@
 
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
+#define REF INS
+#define CPY DEL
 
 /* timing helper function */
 double tvgetf (void)
@@ -54,7 +56,8 @@ int main (int argc, char **argv) {
 
     t1 = tvgetf();
     while ((rtn = fscanf (fp, "%s", word)) != EOF) {
-        if (!tst_ins_del_cpy (&root, word, INS)) {
+        char *p = word;
+        if (!tst_ins_del (&root, &p, INS, CPY)) {
             fprintf (stderr, "error: memory exhausted, tst_insert.\n");
             return 1;
         }
@@ -75,6 +78,7 @@ int main (int argc, char **argv) {
         fgets (word, sizeof word, stdin);
 
         switch (*word) {
+            char *p = NULL;
             case 'p' :  printf ("\nprinting all words in tree (if <= 100).\n\n");
                         if (idx > 100) {
                             fprintf (stderr, "no. of words exceeds 100 (%d), skipped.\n", idx);
@@ -89,8 +93,9 @@ int main (int argc, char **argv) {
                             break;
                         }
                         rmcrlf (word);
+                        p = word;
                         t1 = tvgetf();
-                        res = tst_ins_del_cpy (&root, word, INS);
+                        res = tst_ins_del (&root, &p, INS, CPY);
                         t2 = tvgetf();
                         if (res) {
                             idx++;
@@ -137,9 +142,10 @@ int main (int argc, char **argv) {
                             break;
                         }
                         rmcrlf (word);
+                        p = word;
                         printf ("  deleting %s\n", word);
                         t1 = tvgetf();
-                        res = tst_ins_del_cpy (&root, word, DEL);
+                        res = tst_ins_del (&root, &p, DEL, CPY);
                         t2 = tvgetf();
                         if (res)
                             printf ("  delete failed.\n");

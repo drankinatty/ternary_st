@@ -10,25 +10,17 @@ struct node_tst;
 typedef struct node_tst node_tst;
 
 
-/** tst_ins_del_cpy() insert copy of, or remove, 's' in/from search tree.
- *  insert all nodes required for 's' in tree, with allocation for storage
- *  of 's' at eqkid node of leaf. increments refcnt, if 's' already exists
- *  (to be used for del). 'del=0' inserts, 'del=1' deletes. returns
- *  address of 's' in tree on successful insert (or on delete if refcnt
- *  non-zero), NULL on allocation failure on insert (or on successful
- *  removal of 's' from tree).
+/** tst_ins_del() ins/del copy or reference of 's' from ternary search tree.
+ *  insert all nodes required for 's' in tree at eqkid node of leaf. if 'del'
+ *  is non-zero deletes 's' from tree, otherwise insert 's' at node->eqkid
+ *  with node->key set to the nul-chracter after final node in search path. if
+ *  'cpy' is non-zero allocate storage for 's', otherwise save pointer to 's'.
+ *  if 's' already exists in tree, increment node->refcnt. (to be used for del).
+ *  returns address of 's' in tree on successful insert (or on delete if refcnt
+ *  non-zero), NULL on allocation failure on insert, or on successful removal
+ *  of 's' from tree.
  */
-void *tst_ins_del_cpy (node_tst **root, const char *s, const int del);
-
-/** tst_ins_del_ref() insert or remove reference to 's' in ternary search tree.
- *  insert all nodes required for 's' in tree, with allocation for storage
- *  of 's' at eqkid node of leaf. increment refcnt, if 's' already exists
- *  (to be used for del). 0 for 'del' inserts, 1 for 'del' deletes. returns
- *  address of 's' in tree on successful insert (or on delete if refcnt non-
- *  zero on delete), NULL on allocation failure on insert, or on successful
- *  removal of 's' from tree.
- */
-void *tst_ins_del_ref (node_tst **root, char * const *s, const int del);
+void *tst_ins_del (node_tst **root, char * const *s, const int del, const int cpy);
 
 /** tst_search(), non-recursive find of a string in ternary tree.
  *  returns pointer to 's' on success, NULL otherwise.

@@ -51,7 +51,7 @@ static void *tst_stack_pop (tst_stack *s)
  *  if refcnt non-zero.
  */
 static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk,
-                            int freeword)
+                            const int freeword)
 {
     node_tst *victim = node,            /* begin deletion w/victim */
              *parent = tst_stack_pop (stk); /* parent to victim */
@@ -214,23 +214,25 @@ static void *tst_del_word (node_tst **root, node_tst *node, tst_stack *stk,
     return victim;  /* return NULL on successful free, *node otherwise */
 }
 
-/** tst_ins_del_cpy() insert or remove copy of 's' from ternary search tree.
- *  insert all nodes required for 's' in tree, with allocation for storage
- *  of 's' at eqkid node of leaf. increment refcnt, if 's' already exists
- *  (to be used for del). 0 for 'del' inserts, 1 for 'del' deletes. returns
- *  address of 's' in tree on successful insert (or on delete if refcnt non-
- *  zero on delete), NULL on allocation failure on insert, or on successful
- *  removal of 's' from tree.
+/** tst_ins_del() ins/del copy or reference of 's' from ternary search tree.
+ *  insert all nodes required for 's' in tree at eqkid node of leaf. if 'del'
+ *  is non-zero deletes 's' from tree, otherwise insert 's' at node->eqkid
+ *  with node->key set to the nul-chracter after final node in search path. if
+ *  'cpy' is non-zero allocate storage for 's', otherwise save pointer to 's'.
+ *  if 's' already exists in tree, increment node->refcnt. (to be used for del).
+ *  returns address of 's' in tree on successful insert (or on delete if refcnt
+ *  non-zero), NULL on allocation failure on insert, or on successful removal
+ *  of 's' from tree.
  */
-void *tst_ins_del_cpy (node_tst **root, const char *s, const int del)
+void *tst_ins_del (node_tst **root, char * const *s, const int del, const int cpy)
 {
     int diff;
-    const char *p = s;
+    const char *p = *s;
     tst_stack stk = { .data = {NULL}, .idx = 0 };
     node_tst *curr, **pcurr;
 
-    if (!root || !s) return NULL;           /* validate parameters */
-    if (strlen (s) + 1 > STKMAX / 2)        /* limit length to 1/2 STKMAX */
+    if (!root || !*s) return NULL;          /* validate parameters */
+    if (strlen (*s) + 1 > STKMAX / 2)       /* limit length to 1/2 STKMAX */
         return NULL;                        /* 128 char word lenght is plenty */
 
     pcurr = root;                           /* start at root */
@@ -281,83 +283,17 @@ void *tst_ins_del_cpy (node_tst **root, const char *s, const int del)
          * space for data, copy data as final eqkid, and return.
          */
         if (*p++ == 0) {
-            const char *eqdata = strdup (s);
-            if (!eqdata)
-                return NULL;
-            curr->eqkid = (node_tst *)eqdata;
-            return (void*)eqdata;
-        }
-        pcurr = &(curr->eqkid);
-    }
-}
-
-/** tst_ins_del_ref() insert or remove reference to 's' in ternary search tree.
- *  insert all nodes required for 's' in tree, insert 's' at eqkid node of leaf.
- *  0 for 'del' inserts, 1 for 'del' deletes. returns address of 's' in tree on
- *  successful insert or delete, NULL on successful removal of 's' from tree.
- */
-void *tst_ins_del_ref (node_tst **root, char * const *s, const int del)
-{
-    int diff;
-    const char *p = *s;
-    tst_stack stk = { .data = {NULL}, .idx = 0 };
-    node_tst *curr, **pcurr;
-
-    if (!root || !*s) return NULL;          /* validate parameters */
-    if (strlen (*s) + 1 > STKMAX / 2)       /* limit length to 1/2 STKMAX */
-        return NULL;                        /* 128 char word lenght is plenty */
-
-    pcurr = root;                           /* start at root */
-    while ((curr = *pcurr)) {               /* iterate to insertion node  */
-        diff = *p - curr->key;              /* get ASCII diff for >, <, = */
-        if (diff == 0) {                    /* if char equal to node->key */
-            if (*p++ == 0) {                /* check if word is duplicate */
-                if (del) {                  /* delete instead of insert   */
-                    (curr->refcnt)--;       /* decrement reference count  */
-                    /* chk refcnt, del 's', return NULL on successful del */
-                    return tst_del_word (root, curr, &stk, 0);
-                }
-                else
-                    curr->refcnt++;         /* increment refcnt if word exists */
-                return (void *)curr->eqkid; /* pointer to word / NULL on del  */
+            if (cpy) {  /* allocate storage for 's' */
+                const char *eqdata = strdup (*s);
+                if (!eqdata)
+                    return NULL;
+                curr->eqkid = (node_tst *)eqdata;
+                return (void*)eqdata;
             }
-            pcurr = &(curr->eqkid);         /* get next eqkid pointer address */
-        }
-        else if (diff < 0) {                /* if char less than node->key */
-            pcurr = &(curr->lokid);         /* get next lokid pointer address */
-        }
-        else {                              /* if char greater than node->key */
-            pcurr = &(curr->hikid);         /* get next hikid pointer address */
-        }
-        if (del)
-            tst_stack_push (&stk, curr);    /* push node on stack for del */
-    }
-
-    /* if not duplicate, insert remaining chars into tree rooted at curr */
-    for (;;) {
-        /* allocate memory for node, and fill. use calloc (or include
-         * string.h and initialize w/memset) to avoid valgrind warning
-         * "Conditional jump or move depends on uninitialised value(s)"
-         */
-        if (!(*pcurr = calloc (1, sizeof **pcurr))) {
-            fprintf (stderr, "error: tst_insert(), memory exhausted.\n");
-            return NULL;
-        }
-        curr = *pcurr;
-        curr->key = *p;
-        curr->refcnt = 1;
-        curr->lokid = curr->hikid = curr->eqkid = NULL;
-
-        if (!*root)         /* handle assignment to root if no root */
-            *root = *pcurr;
-
-        /* Place nodes until end of the string, at end of stign allocate
-         * space for data, copy data as final eqkid, and return.
-         */
-        if (*p++ == 0) {
-            // printf ("adding '%s' at %p\n", *s, (void*)*s);
-            curr->eqkid = (node_tst *)*s;
-            return (void*)*s;
+            else {  /* save pointer to 's' (allocated elsewhere) */
+                curr->eqkid = (node_tst *)*s;
+                return (void*)*s;
+            }
         }
         pcurr = &(curr->eqkid);
     }

@@ -7,6 +7,8 @@
 
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
+#define REF INS
+#define CPY DEL
 
 /** timing helper function */
 double tvgetf (void)
@@ -88,7 +90,7 @@ int main (int argc, char **argv) {
 
     t1 = tvgetf();
     for (int i = 0; i < idx; i++) { /* insert reference to each string */
-        if (!tst_ins_del_ref (&root, &words[i], INS)) {
+        if (!tst_ins_del (&root, &words[i], INS, REF)) {
             fprintf (stderr, "error: memory exhausted, tst_insert.\n");
             return 1;
         }
@@ -123,7 +125,7 @@ int main (int argc, char **argv) {
                         rmcrlf (word);
                         words[idx] = strdup (word);
                         t1 = tvgetf();
-                        res = tst_ins_del_ref (&root, &words[idx], INS);
+                        res = tst_ins_del (&root, &words[idx], INS, REF);
                         t2 = tvgetf();
                         if (res) {
                             idx++;
@@ -174,7 +176,7 @@ int main (int argc, char **argv) {
                         tmp = strdup (word);
                         printf ("  deleting %s\n", word);
                         t1 = tvgetf();
-                        res = tst_ins_del_ref (&root, &tmp, DEL);
+                        res = tst_ins_del (&root, &tmp, DEL, REF);
                         t2 = tvgetf();
                         if (res)
                             printf ("  delete failed.\n");

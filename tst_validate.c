@@ -7,6 +7,8 @@
 
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
+#define REF INS
+#define CPY DEL
 
 /** rand_int for use with shuffle */
 static int rand_int (int n)
@@ -77,7 +79,8 @@ int main (int argc, char **argv) {
     /* read words (1 per-line) from fp, insert in tree, add to words */
     while (fscanf (fp, "%s", word) == 1) {
         /* tree insert - allocated (char*)node returned, NULL on failure */
-        if (!tst_ins_del_cpy (&root, word, INS)) {
+        char *p = word;
+        if (!tst_ins_del (&root, &p, INS, CPY)) {
             fprintf (stderr, "error: memory exhausted, tst_insert.\n");
             return 1;
         }
@@ -95,13 +98,11 @@ int main (int argc, char **argv) {
     shuffle_ptrs (words, idx);      /* shuffle pointers in words */
 
     for (i = 0; i < idx; i++) {
-//         printf ("d - %s\n", words[i]);
         if (!tst_search (root, words[i])) {     /* search for word */
             fprintf (stderr, "tst_search - failed: %s\n", words[i]);
             break;
         }
-//         tst_insert_alloc (&root, words[i], DEL);
-        if ((node = tst_ins_del_cpy (&root, words[i], DEL)) &&
+        if ((node = tst_ins_del (&root, &words[i], DEL, CPY)) &&
                 tst_get_refcnt (node) == 0) {  /* delete from tree */
             fprintf (stderr, "tst_insert_alloc (DEL) - failed: %s\n", words[i]);
             break;
@@ -129,16 +130,3 @@ int main (int argc, char **argv) {
 
     return 0;
 }
-
-/*
-        if (++idx == nptrs) {
-            void *tmp = realloc (words, nptrs * 2 * sizeof *words);
-            if (!tmp) {
-                fprintf (stderr, "error: memory exhausted, realloc.\n");
-                break;
-            }
-            words = tmp;
-            memset (words + nptrs, 0, nptrs);
-            nptrs *= 2;
-        }
-*/
