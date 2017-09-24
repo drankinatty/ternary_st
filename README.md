@@ -8,13 +8,17 @@ https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
 A *ternary search tree (tst)* is a binary search tree (bst) with an additional node pointer.
 
-There is a relative dearth of information available about ternary trees, and specifially, proper node-rotation when a node is deleted from the tree. The only examples for a node-delete found are simple deletes that leave the tree dirty by leaving a node, with or withoutsiblings, but having no valid middle (or equal) pointer. The following code, written as part of a text-editor word-completion implementation, provides a proper delete with rotation of the low or high node for the victim in place of the victim.
+There is a relative dearth of information available about ternary trees, and specifially, proper node-rotation when a node is deleted from the tree. The only examples for a node-delete found are simple deletes that leave the tree dirty by leaving a node, with or without siblings, but having no valid middle (or equal) pointer. The following code, written as part of a text-editor word-completion implementation, provides a proper delete with rotation of the low or high node in place of the deleted node.
+
+*Ternary Search Tree Into*
 
 With a binary search tree each node contains a *left* and *right* node-pointer so a binary choice controls traversal. Either a *greater than* or *less than* choice. As the result of a comparison between the node-data and a reference either the left or right node-pointer is used to further descend.
 
 A ternary search tree adds a third (or middle) node. While you can still use the `left-middle-right` notation, ternary trees use a `low-equal-high` pointer verbiage. With each node holding a *key ID*, the node pointers for the this code uses a `lokid`, `eqkid`, and `hikid` pointer naming convention. If the difference between a refernence and the node key is negative (lower than), the `lokid` node is traversed, if they are equal, the `eqkid` node is followed or `hikid` is followed.
 
-In addition to the `node->key`, the node used in this example adds a *reference count* (a `node->refcnt`) to the node data to track the number of occurrances for each word it holds. So for example, if using the tree to track the words in an editor buffer (where there may be multiple occurrences of 'the' or other common words), the node holding 'the' is not deleted, upon delete, until no other occurrences remain (i.e. the `node->refcnt` is zero).
+*Tree-node Used In This Code*
+
+In addition to the `node->key`, the node used in this example adds a *reference count* (a `node->refcnt`) to the node data to track the number of occurrances for each word it holds. So for example, if using the tree to track the words in an editor buffer (where there may be multiple occurrences of 'the' or other common words), the node holding 'the' is not deleted, until no other occurrences remain (i.e. the `node->refcnt` is zero).
 
 Each individual node has the following form:
 
@@ -26,7 +30,7 @@ Each individual node has the following form:
                   o           o           o
 
 
-The string data (a pointer to a word, or a copy of the word itself) is stored in an additional special node following the node containing the last character (node->key) in the search path for the word, cast to type (node *) and stored as the `node->eqkid` pointer. Further, since this is the *node after the last character*, its key is the *nul-character* (decimal `0`) just as you would expect when ending a string. Thus, the 'key's for each of the nodes that make up the search path of a word, are the letters in the word with the final node having a key `0` with either a pointer to the string (if stored in an external data structure) or an allocated copy of the string itself if the string is to be stored in the tree. (as in holding the words for an edit buffer, where the location/address for the string changes with each keypress). In either case, the traversal down nodes to the final node will have a form similar to the following for the word "cat":
+The string data (a pointer to a word, or a copy of the word itself) is stored as a pointer in an additional/special node following the node containing the last character (node->key) in the search path. The pointer to the data is cast to type (node *) and stored as the `node->eqkid` pointer. Further, since this is the *node after the last character*, similar to the end of a string, its key is the *nul-character* (decimal `0`). The 'key's for each of the nodes that make up the search path of a word, are the letters in the word with the final node having a key `0` with either a pointer to the string (if stored in an external data structure) or an allocated copy of the string itself if the string is to be stored in the tree. (as in holding the words for an edit buffer, where the location/address for the string changes with each keypress). In either case, the traversal to the final node will have a form similar to the following for the word "cat":
 
                               o
                               |-c
@@ -51,14 +55,20 @@ The string data (a pointer to a word, or a copy of the word itself) is stored in
                         NULL  o  NULL
                             "cat"
 
-The ternary tree has the same O(n) efficiency for insert and search as does a bst. The delete is only slightly worse due to the proper deletion of the chain of unique nodes that make a word and proper rotation to eliminate the final node containing siblings. Lookup times associated with loading the entire `/usr/share/dict/words` file and searching range between `0.000002 - 0.000014` sec. However, the *prefix search* ability offered by the ternary search tree sets it apart from virtually all other data stuctures. While Tri/Radix trees can perform as well, their memory requirements are often 20 times more than a ternary tree.
+The ternary tree has the same O(n) efficiency for insert and search as does a bst. A dirty delete from the tree is O(n). This delete with rotation is only slightly less efficient due to the proper deletion of the chain of all unique nodes in the search path and proper rotation. Lookup times associated with loading the entire `/usr/share/dict/words` file and searching range between `0.000002 - 0.000014` sec. However, the *prefix search* ability offered by the ternary search tree sets it apart from virtually all other data stuctures. While Tri/Radix trees can perform as well, their memory requirements to cover all ASCII characters are often 20 times that of a ternary tree.
 
-The `/usr/share/dict/words` file (or `/var/lib/dict/words` on some systems) holds roughly 305000 words. You can load this file for testing, or I have also provided the first 1000 words from the file in `words1000.txt` if you are not on a Linux/Unix machine.
+*Example words File Profided (or use dict/words)*
+
+The `/usr/share/dict/words` file (or `/var/lib/dict/words` on some systems) holds roughly 305000 words (including plural possessives), and roughly 249092 words without. You can load the full words file for testing, or I have also provided the first 1000 words from the file in `words1000.txt` if you are not on a Linux/Unix machine.
+
+*Ternary Search Tree Source Files*
 
 The files containing the ternary tree implementation are:
 
     ternary_st.h
     ternary_st.c
+
+*Interactive Example Programs*
 
 The following two test files provide a short menu driven application:
 
@@ -76,7 +86,9 @@ The test application provides the following operations on the tree:
 
 (note: code skips printing tree with more than 100 words)
 
-The final file `tst_validate.c` is a short torture test fully exercising and validating tree integrity. After the tree is filled, the array of pointer to words used to fill the tree are shuffled into a random order and `delete` is called on each word in the shuffled list. A further inner loop than validates that every remaining word and every pointer in the tree each time a deletion takes place. It is a validation routine, so the only output avoided is the following on success, on error, a dump of the deltetion order file and current list state is made. The successul output is similar to:
+*Tree Validation Program*
+
+The final file `tst_validate.c` is a short torture test fully exercising and validating tree integrity. After the tree is filled, the array of pointer to words used to fill the tree are shuffled into a random order and `delete` is called on each word in the shuffled list. A further inner loop than validates that every remaining word and every pointer in the tree each time a deletion takes place. It is a validation routine, so the only output provided is the following on success, on error, a dump of the deltetion order file and current list state is made. The successul output is similar to:
 
     $ tst_validate dat/dictwords_1000.txt
     ternary_search_tree, loaded, 1000 words.
@@ -86,6 +98,8 @@ Compilation with full error checking and optimization is suggested, e.g.
 
     $ gcc -Wall -Wextra -pedantic -Wshadow -finline-functions -std=gnu11 -Ofast \
       ternary_st.c -o bin/ternary_st_val ternary_st_val.c
+
+*Prefix Searching*
 
 The benefit of a ternary tree for prefix searching of text lies in its ability to quickly traverse a tree of any size finding the node containing the last character in the wanted prefix. An in-order traversal of that node identifies all strings in the tree containing the prefix. For example, in the `words1000.txt` file, you can locate all words beginning with `abr` near instantaneously, e.g.
 
