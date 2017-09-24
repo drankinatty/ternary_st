@@ -10,7 +10,7 @@ A *ternary search tree (tst)* is a binary search tree (bst) with an additional n
 
 There is a relative dearth of information available about ternary trees, and specifially, proper node-rotation when a node is deleted from the tree. The only examples for a node-delete found are simple deletes that leave the tree dirty by leaving a node, with or without siblings, but having no valid middle (or equal) pointer. The following code, written as part of a text-editor word-completion implementation, provides a proper delete with rotation of the low or high node in place of the deleted node.
 
-*Ternary Search Tree Into*
+*Ternary Search Tree Intro*
 
 With a binary search tree each node contains a *left* and *right* node-pointer so a binary choice controls traversal. Either a *greater than* or *less than* choice. As the result of a comparison between the node-data and a reference either the left or right node-pointer is used to further descend.
 
