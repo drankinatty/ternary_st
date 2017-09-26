@@ -14,7 +14,7 @@ There is a relative dearth of information available about ternary trees, and spe
 
 With a binary search tree each node contains a *left* and *right* node-pointer so a binary choice controls traversal. Either a *greater than* or *less than* choice. As the result of a comparison between the node-data and a reference either the left or right node-pointer is used to further descend.
 
-A ternary search tree adds a third (or middle) node. While you can still use the `left-middle-right` notation, ternary trees use a `low-equal-high` pointer verbiage. With each node holding a *key ID*, the node pointers for the this code uses a `lokid`, `eqkid`, and `hikid` pointer naming convention. If the difference between a refernence and the node key is negative (lower than), the `lokid` node is traversed, if they are equal, the `eqkid` node is followed or `hikid` is followed.
+A ternary search tree adds a third (or middle) node. While you can still use the `left-middle-right` notation, ternary trees use a `low-equal-high` pointer verbiage. With each node holding a *key ID*, the node pointers for this code uses a `lokid`, `eqkid`, and `hikid` pointer naming convention. If the difference between a refernence and the node key is negative (lower than), the `lokid` node is traversed, if they are equal, the `eqkid` node is followed or `hikid` is followed. The addition of the `equal` pointer and storage of character data as the `node->key` makes the ternary search tree optimal for string and prefix searching.
 
 *Tree-node Used In This Code*
 
