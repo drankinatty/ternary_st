@@ -68,6 +68,7 @@ int main (int argc, char **argv) {
     printf ("ternary_tree, loaded %d words in %.6f sec\n\n", idx, t2-t1);
 
     for (;;) {
+        char *p = NULL;
         printf ("\n p  print words in tree\n"
                 " a  add word to the tree\n"
                 " f  find word in tree\n"
@@ -78,7 +79,6 @@ int main (int argc, char **argv) {
         fgets (word, sizeof word, stdin);
 
         switch (*word) {
-            char *p = NULL;
             case 'p' :  printf ("\nprinting all words in tree (if <= 100).\n\n");
                         if (idx > 100) {
                             fprintf (stderr, "no. of words exceeds 100 (%d), skipped.\n", idx);
