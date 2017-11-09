@@ -57,7 +57,7 @@ The string data (a pointer to a word, or a copy of the word itself) is stored as
 
 The ternary tree has the same O(n) efficiency for insert and search as does a bst. A dirty delete from the tree is O(n). This delete with rotation is only slightly less efficient due to the proper deletion of the chain of all unique nodes in the search path and proper rotation. Lookup times associated with loading the entire `/usr/share/dict/words` file and searching range between `0.000002 - 0.000014` sec. However, the *prefix search* ability offered by the ternary search tree sets it apart from virtually all other data stuctures. While Tri/Radix trees can perform as well, their memory requirements to cover all ASCII characters are often 20 times that of a ternary tree.
 
-*Example words File Profided (or use dict/words)*
+*Example words File Provided (or use dict/words)*
 
 The `/usr/share/dict/words` file (or `/var/lib/dict/words` on some systems) holds roughly 305000 words (including plural possessives), and roughly 249092 words without. You can load the full words file for testing, or I have also provided the first 1000 words from the file in `words1000.txt` if you are not on a Linux/Unix machine.
 
