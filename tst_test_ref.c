@@ -24,11 +24,10 @@ double tvgetf (void)
     return sec;
 }
 
-/** simple trim '\n' from end of buffer filled by fgets */
-void rmcrlf (char *s) {
-    size_t len = strlen (s);
-    if (len && s[len - 1] == '\n')
-        s[--len] = 0;
+/** trim trailing '\r\n' using strcspn */
+void rmcrlf (char *s)
+{
+    s[strcspn (s, "\r\n")] = 0;
 }
 
 /** simple realloc of ptr with psz elemets to nelem * 2 */
