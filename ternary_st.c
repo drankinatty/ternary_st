@@ -340,9 +340,9 @@ void tst_suggest (const node_tst *p, const char c, const size_t nchr,
 
 /** tst_search_prefix fills ptr array 'a' with words prefixed with 's'.
  *  once the node containing the first prefix matching 's' is found
- *  tst_suggest is called to travers the ternary_tree beginning
+ *  tst_suggest is called to traverse the ternary_tree beginning
  *  at the node filling 'a' with pointers to all words that contain
- *  the prefix upto 'max' words updating 'n' with the number of word
+ *  the prefix up to 'max' words updating 'n' with the number of words
  *  in 'a'. a pointer to the first node is returned on success
  *  NULL otherwise.
  */

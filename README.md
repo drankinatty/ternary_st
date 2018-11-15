@@ -59,7 +59,7 @@ The ternary tree has the same O(n) efficiency for insert and search as does a bs
 
 *Example words File Provided (or use dict/words)*
 
-The `/usr/share/dict/words` file (or `/var/lib/dict/words` on some systems) holds roughly 305000 words (including plural possessives), and roughly 249092 words without. You can load the full words file for testing, or I have also provided the first 1000 words from the file in `words1000.txt` if you are not on a Linux/Unix machine.
+The `/usr/share/dict/words` file (or `/var/lib/dict/words` on some systems) holds roughly 305000 words (including plural possessives), and roughly 249092 words without. You can load the full words file for testing, or I have also provided the first 1000 words from the file in `words1000.txt` if you are not on a Linux/Unix machine. There is also a nice [english-words](https://github.com/dwyl/english-words/blob/master/words_alpha.txt) list here on github with `370099` words (up to 31-chars, e.g. `"dichlorodiphenyltrichloroethane"`) that can be used with the test programs provided along with this code. (note the `words_alpha.txt` file has DOS line endings). The test routines handle either DOS of POSIX line endings.
 
 *Ternary Search Tree Source Files*
 
