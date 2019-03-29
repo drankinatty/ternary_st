@@ -75,11 +75,13 @@ int main (int argc, char **argv) {
 
     t1 = tvgetf();
     while ((rtn = fscanf (fp, "%s", word)) != EOF) {
-        words[idx] = strdup (word); /* allocate/copy to words[idx] */
+        size_t len = strlen (word);
+        words[idx] = malloc (len + 1);
         if (!words[idx]) {
             fprintf (stderr, "error: memory exhausted (strdup).\n");
             return 1;
         }
+        memcpy (words[idx], word, len + 1);
         if (++idx == (int)nptr)     /* realloc ptrs as required */
             words = xrealloc2 (words, sizeof *words, &nptr);
     }
@@ -98,6 +100,7 @@ int main (int argc, char **argv) {
     printf ("ternary_tree, loaded %d words in %.6f sec\n\n", idx, t2-t1);
 
     for (;;) {
+        size_t len;
         printf ("\n p  print words in tree\n"
                 " a  add word to the tree\n"
                 " f  find word in tree\n"
@@ -121,8 +124,13 @@ int main (int argc, char **argv) {
                             fprintf (stderr, "error: insufficient input.\n");
                             break;
                         }
-                        rmcrlf (word);
-                        words[idx] = strdup (word);
+                        word[(len = strcspn (word, "\r\n"))] = 0;
+                        words[idx] = malloc (len + 1);
+                        if (!words[idx]) {
+                            fprintf (stderr, "error: memory exhausted (strdup).\n");
+                            break;
+                        }
+                        memcpy (words[idx], word, len + 1);
                         t1 = tvgetf();
                         res = tst_ins_del (&root, &words[idx], INS, REF);
                         t2 = tvgetf();
@@ -171,8 +179,13 @@ int main (int argc, char **argv) {
                             fprintf (stderr, "error: insufficient input.\n");
                             break;
                         }
-                        rmcrlf (word);
-                        tmp = strdup (word);
+                        word[(len = strcspn (word, "\r\n"))] = 0;
+                        tmp = malloc (len + 1);
+                        if (!tmp) {
+                            fprintf (stderr, "error: memory exhausted (strdup).\n");
+                            break;
+                        }
+                        memcpy (tmp, word, len + 1);
                         printf ("  deleting %s\n", word);
                         t1 = tvgetf();
                         res = tst_ins_del (&root, &tmp, DEL, REF);

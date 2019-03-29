@@ -282,9 +282,11 @@ void *tst_ins_del (node_tst **root, char * const *s, const int del, const int cp
          */
         if (*p++ == 0) {
             if (cpy) {  /* allocate storage for 's' */
-                const char *eqdata = strdup (*s);
+                size_t len = strlen (*s);
+                char *eqdata = malloc (len + 1);
                 if (!eqdata)
                     return NULL;
+                memcpy (eqdata, *s, len + 1);
                 curr->eqkid = (node_tst *)eqdata;
                 return (void*)eqdata;
             }

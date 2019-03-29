@@ -94,9 +94,11 @@ The final file `tst_validate.c` is a short torture test fully exercising and val
     ternary_search_tree, loaded, 1000 words.
     1000 successful deletions from search tree.
 
-Compilation with full error checking and optimization is suggested, e.g.
+*Compilation*
 
-    $ gcc -Wall -Wextra -pedantic -Wshadow -finline-functions -std=gnu11 -Ofast \
+Compilation with full error checking and optimization is suggested, e.g. and a Makefile is provided that will build the `ternary_st.o` object file and then compile all test programs placing the executables in a `./bin` subdirectory. You can individually compile any of the test programs similar to the following:
+
+    $ gcc -Wall -Wextra -pedantic -Wshadow -finline-functions -std=c11 -Ofast \
       ternary_st.c -o bin/ternary_st_val ternary_st_val.c
 
 *Prefix Searching*
@@ -159,5 +161,22 @@ The search and prefix search times remain fast as the size of the tree increases
     suggest[71] : abruptness
     suggest[72] : abruptnesses
 
+**Changes**
+
+With the addition of a `Makefile` the source tree has been reorganized to separate the source and include files into separate directories as well as moving the example file to the `dat` subdirectory. The source tree layout is now:
+
+    ├── Makefile
+    ├── README.md
+    ├── dat
+    │   └── words1000.txt
+    ├── include
+    │   └── ternary_st.h
+    └── src
+        ├── ternary_st.c
+        ├── tst_test_cpy.c
+        ├── tst_test_ref.c
+        └── tst_validate.c
+
+`strdup` had been removed and replace with standard `strlen, malloc, memcpy` to address the removal of `strdup` with C99. While many compilers provide `strdup` as an extension, as was originally provided by `-std=gnu11`, the code is now C11 standard compliant and backward compatible with prior versions.
 
 If you find any problems, let me know (or better yet provide a patch).

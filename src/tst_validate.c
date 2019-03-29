@@ -80,15 +80,17 @@ int main (int argc, char **argv) {
     while (fscanf (fp, "%s", word) == 1) {
         /* tree insert - allocated (char*)node returned, NULL on failure */
         char *p = word;
+        size_t len = strlen (word);
         if (!tst_ins_del (&root, &p, INS, CPY)) {
             fprintf (stderr, "error: memory exhausted, tst_insert.\n");
             return 1;
         }
-        words[idx] = strdup (word);         /* copy to words */
+        words[idx] = malloc (len + 1);
         if (!words[idx]) {                  /* validate strdup allocation */
             fprintf (stderr, "error: memory exhausted, words[%zu]\n", idx);
             return 1;
         }
+        memcpy (words[idx], word, len + 1);
         if (++idx == nptrs)         /* realloc as required */
             words = xrealloc (words, sizeof *words, &nptrs);
     }
