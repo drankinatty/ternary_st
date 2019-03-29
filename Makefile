@@ -27,26 +27,17 @@ SOURCES	:= $(wildcard $(SRCDIR)/tst*.c)
 INCLUDES := $(wildcard $(INCLUDE)/*.h)
 OBJECTS := obj/$(TSTCODE).o
 
-# all:	$(OBJECTS)
-# 	@mkdir -p $(@D)/bin
-# 	$(CCLD) -o $(BINDIR)/$(TESTCPY) $(SRCDIR)/$(TESTCPY).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
-# 	$(CCLD) -o $(BINDIR)/$(TESTREF) $(SRCDIR)/$(TESTREF).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
-# 	$(CCLD) -o $(BINDIR)/$(TESTVAL) $(SRCDIR)/$(TESTVAL).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
-
 all:    $(TESTCPY) $(TESTREF) $(TESTVAL)
 
-# $(TESTCPY):     $(OBJECTS)
-$(TESTCPY):
+$(TESTCPY):     $(OBJECTS)
 	@mkdir -p $(@D)/bin
 	$(CCLD) -o $(BINDIR)/$(TESTCPY) $(SRCDIR)/$(TESTCPY).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
-# $(TESTREF):     $(OBJECTS)
-$(TESTREF):
+$(TESTREF):     $(OBJECTS)
 	@mkdir -p $(@D)/bin
 	$(CCLD) -o $(BINDIR)/$(TESTREF) $(SRCDIR)/$(TESTREF).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
-# $(TESTVAL):     $(OBJECTS)
-$(TESTVAL):
+$(TESTVAL):     $(OBJECTS)
 	@mkdir -p $(@D)/bin
 	$(CCLD) -o $(BINDIR)/$(TESTVAL) $(SRCDIR)/$(TESTVAL).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
@@ -59,7 +50,7 @@ endif
 $(OBJDIR)/$(TSTCODE).o:	$(INCLUDE)/$(TSTCODE).h
 
 # create object dir/compile objects
-$(OBJECTS):	$(OBJDIR)/$(TSTCODE).o $(SRCDIR)/$(TSTCODE).c
+$(OBJECTS):	$(SRCDIR)/$(TSTCODE).c
 	@mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c -o $(OBJDIR)/$(TSTCODE).o $(SRCDIR)/$(TSTCODE).c
 

@@ -177,6 +177,6 @@ With the addition of a `Makefile` the source tree has been reorganized to separa
         ├── tst_test_ref.c
         └── tst_validate.c
 
-`strdup` had been removed and replace with standard `strlen, malloc, memcpy` to address the removal of `strdup` with C99. While many compilers provide `strdup` as an extension, as was originally provided by `-std=gnu11`, the code is now C11 standard compliant and backward compatible with prior versions.
+`strdup` has been removed and replaced with standard `strlen, malloc, memcpy` to address the removal of `strdup` from the C99 standard. While many compilers provide `strdup` as an extension, as was originally provided by `-std=gnu11`, the code is now C11 standard compliant and backward compatible with prior versions.
 
 If you find any problems, let me know (or better yet provide a patch).
