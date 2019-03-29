@@ -12,7 +12,7 @@ OBJDIR  := obj
 INCLUDE	:= include
 SRCDIR  := src
 # compiler and linker flags
-CFLAGS  := -Wall -Wextra -pedantic -finline-functions -std=gnu11 -Wshadow
+CFLAGS  := -Wall -Wextra -pedantic -finline-functions -std=c11 -Wshadow
 CFLAGS	+= -I$(INCLUDE)
 ifeq ($(debug),-DDEBUG)
 CFLAGS  += -g
@@ -27,10 +27,27 @@ SOURCES	:= $(wildcard $(SRCDIR)/tst*.c)
 INCLUDES := $(wildcard $(INCLUDE)/*.h)
 OBJECTS := obj/$(TSTCODE).o
 
-all:	$(OBJECTS)
+# all:	$(OBJECTS)
+# 	@mkdir -p $(@D)/bin
+# 	$(CCLD) -o $(BINDIR)/$(TESTCPY) $(SRCDIR)/$(TESTCPY).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
+# 	$(CCLD) -o $(BINDIR)/$(TESTREF) $(SRCDIR)/$(TESTREF).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
+# 	$(CCLD) -o $(BINDIR)/$(TESTVAL) $(SRCDIR)/$(TESTVAL).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
+
+all:    $(TESTCPY) $(TESTREF) $(TESTVAL)
+
+# $(TESTCPY):     $(OBJECTS)
+$(TESTCPY):
 	@mkdir -p $(@D)/bin
 	$(CCLD) -o $(BINDIR)/$(TESTCPY) $(SRCDIR)/$(TESTCPY).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
+
+# $(TESTREF):     $(OBJECTS)
+$(TESTREF):
+	@mkdir -p $(@D)/bin
 	$(CCLD) -o $(BINDIR)/$(TESTREF) $(SRCDIR)/$(TESTREF).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
+
+# $(TESTVAL):     $(OBJECTS)
+$(TESTVAL):
+	@mkdir -p $(@D)/bin
 	$(CCLD) -o $(BINDIR)/$(TESTVAL) $(SRCDIR)/$(TESTVAL).c obj/$(TSTCODE).o $(CFLAGS) $(LDFLAGS) $(LIBS)
 
 # strip only if -DDEBUG not set
