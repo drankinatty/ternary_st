@@ -277,7 +277,7 @@ void *tst_ins_del (node_tst **root, char * const *s, const int del, const int cp
         if (!*root)         /* handle assignment to root if no root */
             *root = *pcurr;
 
-        /* Place nodes until end of the string, at end of stign allocate
+        /* Place nodes until end of the string, at end of strign allocate
          * space for data, copy data as final eqkid, and return.
          */
         if (*p++ == 0) {
