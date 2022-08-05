@@ -2,23 +2,23 @@
 
 Copyright David C. Rankin, J.D.,P.E. 2017
 
-Licensed Under GPLv2 availabe here
+Licensed Under GPLv2 available here
 
 https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
 
 A *ternary search tree (tst)* is a binary search tree (bst) with an additional node pointer.
 
-There is a relative dearth of information available about ternary trees, and specifially, proper node-rotation when a node is deleted from the tree. The only examples for a node-delete found are simple deletes that leave the tree dirty by leaving a node, with or without siblings, but having no valid middle (or equal) pointer. The following code, written as part of a text-editor word-completion implementation, provides a proper delete with rotation of the low or high node in place of the deleted node.
+There is a relative dearth of information available about ternary trees, and specifically, proper node-rotation when a node is deleted from the tree. The only examples for a node-delete found are simple deletes that leave the tree dirty by leaving a node, with or without siblings, but having no valid middle (or equal) pointer. The following code, written as part of a text-editor word-completion implementation, provides a proper delete with rotation of the low or high node in place of the deleted node.
 
 *Ternary Search Tree Intro*
 
 With a binary search tree each node contains a *left* and *right* node-pointer so a binary choice controls traversal. Either a *greater than* or *less than* choice. As the result of a comparison between the node-data and a reference either the left or right node-pointer is used to further descend.
 
-A ternary search tree adds a third (or middle) node. While you can still use the `left-middle-right` notation, ternary trees use a `low-equal-high` pointer verbiage. With each node holding a *key ID*, the node pointers for this code uses a `lokid`, `eqkid`, and `hikid` pointer naming convention. If the difference between a refernence and the node key is negative (lower than), the `lokid` node is traversed, if they are equal, the `eqkid` node is followed or `hikid` is followed. The addition of the `equal` pointer and storage of character data as the `node->key` makes the ternary search tree optimal for string and prefix searching.
+A ternary search tree adds a third (or middle) node. While you can still use the `left-middle-right` notation, ternary trees use a `low-equal-high` pointer verbiage. With each node holding a *key ID*, the node pointers for this code uses a `lokid`, `eqkid`, and `hikid` pointer naming convention. If the difference between a reference and the node key is negative (lower than), the `lokid` node is traversed, if they are equal, the `eqkid` node is followed or `hikid` is followed. The addition of the `equal` pointer and storage of character data as the `node->key` makes the ternary search tree optimal for string and prefix searching.
 
 *Tree-node Used In This Code*
 
-In addition to the `node->key`, the node used in this example adds a *reference count* (a `node->refcnt`) to the node data to track the number of occurrances for each word it holds. So for example, if using the tree to track the words in an editor buffer (where there may be multiple occurrences of 'the' or other common words), the node holding 'the' is not deleted, until no other occurrences remain (i.e. the `node->refcnt` is zero).
+In addition to the `node->key`, the node used in this example adds a *reference count* (a `node->refcnt`) to the node data to track the number of occurrences for each word it holds. So for example, if using the tree to track the words in an editor buffer (where there may be multiple occurrences of 'the' or other common words), the node holding 'the' is not deleted, until no other occurrences remain (i.e. the `node->refcnt` is zero).
 
 Each individual node has the following form:
 
@@ -55,7 +55,7 @@ The string data (a pointer to a word, or a copy of the word itself) is stored as
                         NULL  o  NULL
                             "cat"
 
-The ternary tree has the same O(n) efficiency for insert and search as does a bst. A dirty delete from the tree is O(n). This delete with rotation is only slightly less efficient due to the proper deletion of the chain of all unique nodes in the search path and proper rotation. Lookup times associated with loading the entire `/usr/share/dict/words` file and searching range between `0.000002 - 0.000014` sec. However, the *prefix search* ability offered by the ternary search tree sets it apart from virtually all other data stuctures. While Tri/Radix trees can perform as well, their memory requirements to cover all ASCII characters are often 20 times that of a ternary tree.
+The ternary tree has the same O(n) efficiency for insert and search as does a bst. A dirty delete from the tree is O(n). This delete with rotation is only slightly less efficient due to the proper deletion of the chain of all unique nodes in the search path and proper rotation. Lookup times associated with loading the entire `/usr/share/dict/words` file and searching range between `0.000002 - 0.000014` sec. However, the *prefix search* ability offered by the ternary search tree sets it apart from virtually all other data structures. While Tri/Radix trees can perform as well, their memory requirements to cover all ASCII characters are often 20 times that of a ternary tree.
 
 *Example words File Provided (or use dict/words)*
 
@@ -88,7 +88,7 @@ The test application provides the following operations on the tree:
 
 *Tree Validation Program*
 
-The final file `tst_validate.c` is a short torture test fully exercising and validating tree integrity. After the tree is filled, the array of pointer to words used to fill the tree are shuffled into a random order and `delete` is called on each word in the shuffled list. A further inner loop than validates that every remaining word and every pointer in the tree each time a deletion takes place. It is a validation routine, so the only output provided is the following on success, on error, a dump of the deltetion order file and current list state is made. The successul output is similar to:
+The final file `tst_validate.c` is a short torture test fully exercising and validating tree integrity. After the tree is filled, the array of pointer to words used to fill the tree are shuffled into a random order and `delete` is called on each word in the shuffled list. A further inner loop than validates that every remaining word and every pointer in the tree each time a deletion takes place. It is a validation routine, so the only output provided is the following on success, on error, a dump of the deletion order file and current list state is made. The successful output is similar to:
 
     $ tst_validate dat/dictwords_1000.txt
     ternary_search_tree, loaded, 1000 words.
