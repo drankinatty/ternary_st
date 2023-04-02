@@ -1,0 +1,89 @@
+## library name, soname and version
+TSTNAME := ternary_st
+LIBNAME	:= libternary_st
+SONMVER	:= 1
+VER	:= $(SONMVER).0
+## compiler
+CC	:= gcc
+CCLD    := $(CC)
+## output/object/include/source directories
+BINDIR  := bin
+OBJDIR  := obj
+INCLUDE	:= include
+SRCDIR  := src
+LIBDIR  := lib
+CNFDIR  := conf
+CNFILE  := ternary_st.conf
+ETCDIR  := /etc/ld.so.conf.d
+## compiler and linker flags
+CFLAGS  := -Wall -Wextra -pedantic -Werror -finline-functions -std=c11 -Wshadow
+CFLAGS	+= -I$(INCLUDE)
+CFLAGS 	+= -fPIC
+ifeq ($(debug),-DDEBUG)
+CFLAGS  += -g
+else
+CFLAGS  += -Ofast
+endif
+LDFLAGS := -shared -Wl,-soname,$(LIBNAME).so.$(SONMVER)
+## libraries
+LIBS    :=
+## source/include/object variables
+# SOURCES	:= $(wildcard $(SRCDIR)/tst*.c)
+SOURCES	:= $(SRCDIR)/$(TSTNAME).c
+INCLUDES := $(wildcard $(INCLUDE)/*.h)
+OBJECTS := $(OBJDIR)/$(LIBNAME).o
+## install
+INSTDIR	:= lib64
+UNAME_M := $(shell uname -m)
+# if machine type is i386, i486, etc.. use lib for install
+ifeq (i,$(findstring i,$(UNAME_M)))
+  INSTDIR := lib
+endif
+## PREFIX is environment variable, but if it is not set, then set default value
+ifeq ($(PREFIX),)
+  PREFIX := /usr/local
+endif
+
+.PHONY:	clean
+
+$(LIBNAME):	$(OBJECTS)
+	@mkdir -p $(@D)/$(LIBDIR)
+	$(CCLD) -o $(LIBDIR)/$(LIBNAME).so.$(VER) $(OBJECTS) $(LDFLAGS) $(LIBS)
+	# create symlinks in lib directory
+	ln -sf $(LIBNAME).so.$(VER) $(LIBDIR)/$(LIBNAME).so
+	ln -sf $(LIBNAME).so.$(VER) $(LIBDIR)/$(LIBNAME).so.$(SONMVER)
+	# create config directory and ld.so.conf.d config
+	mkdir -p $(@D)/$(CNFDIR) && echo $(PREFIX)/$(INSTDIR) > $(CNFDIR)/$(CNFILE)
+
+## strip only if -DDEBUG not set
+ifneq ($(debug),-DDEBUG)
+	strip -s $(LIBDIR)/*
+endif
+
+## create object dir/compile objects
+$(OBJECTS):	$(INCLUDES)
+	@mkdir -p $(OBJDIR)
+	$(CC) $(CFLAGS) $(DEFS) -c -o $(OBJECTS) $(SOURCES)
+
+## install library
+install:
+	install -d $(DESTDIR)$(PREFIX)/$(INSTDIR)/
+	install -p $(LIBDIR)/$(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/
+	# post_install - create install directory and symlinks
+	$(POST_INSTALL)
+	# create INSTDIR if it doesn't exits, if lib exists, soflink lib64
+	if [ ! -d $(PREFIX)/$(INSTDIR) -a ! -h $(PREFIX)/$(INSTDIR) ]; then \
+	  if [ ! -d $(PREFIX)/lib ]; then mkdir -p $(PREFIX)/lib; fi; \
+	  ln -sf $(PREFIX)/lib $(PREFIX)/$(INSTDIR); \
+	fi
+	# creae the symlinks
+	ln -sf  $(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/$(LIBNAME).so
+	ln -sf  $(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/$(LIBNAME).so.$(SONMVER)
+	# install conf file, $(CNFILE), in /etc/ld.so.conf.d/
+	install -p -m 0644 $(CNFDIR)/$(CNFILE) $(DESTDIR)$(ETCDIR)/
+	# update linker shared-object lib cache
+	ldconfig
+
+## clean source directory
+clean:
+	rm -rf $(LIBDIR) $(OBJDIR) $(CNFDIR) 2>/dev/null
