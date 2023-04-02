@@ -166,6 +166,7 @@ The search and prefix search times remain fast as the size of the tree increases
 With the addition of a `Makefile` the source tree has been reorganized to separate the source and include files into separate directories as well as moving the example file to the `dat` subdirectory. The source tree layout is now:
 
     ├── Makefile
+    ├── Makefile.lib
     ├── README.md
     ├── dat
     │   └── words1000.txt
@@ -179,4 +180,8 @@ With the addition of a `Makefile` the source tree has been reorganized to separa
 
 `strdup` has been removed and replaced with standard `strlen, malloc, memcpy` to address the removal of `strdup` from the C99 standard. While many compilers provide `strdup` as an extension, as was originally provided by `-std=gnu11`, the code is now C11 standard compliant and backward compatible with prior versions.
 
-If you find any problems, let me know (or better yet provide a patch).
+An additional makefile `Makefile.lib` was added which builds a Linux shared-object library from the `ternary_st` source. The original makefile builds the .so by default by calling `Makefile.lib` within the `all:` rule. You can build-only the shared-object library by invoking make as `make libternary_st` or by simply passing the `-f` option to call make on the library makefile with `make -f Makefile.lib`.
+
+Adding `install` (and running with elevated privileges) will install the shared-object library in `$(PREFIX)/$(INSTDIR)` (`/usr/local/lib64` by default). The configuration file containing the path is installed in `/etc/ld.so.conf.d/ternary_st.conf` and `ldconfig` is run to update the linker shared-object library cache.
+
+If you find any problems, let me know (or better yet, create a pull-request and provide a patch).
