@@ -67,16 +67,16 @@ $(OBJECTS):	$(INCLUDES)
 
 ## install library
 install:
-	install -d $(DESTDIR)$(PREFIX)/$(INSTDIR)/
-	install -p $(LIBDIR)/$(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/
 	# post_install - create install directory and symlinks
 	$(POST_INSTALL)
 	# create INSTDIR if it doesn't exits, if lib exists, soflink lib64
-	if [ ! -d $(PREFIX)/$(INSTDIR) -a ! -h $(PREFIX)/$(INSTDIR) ]; then \
-	  if [ ! -d $(PREFIX)/lib ]; then mkdir -p $(PREFIX)/lib; fi; \
-	  ln -sf $(PREFIX)/lib $(PREFIX)/$(INSTDIR); \
+	if [ ! -d $(DESTDIR)$(PREFIX)/$(INSTDIR) -a ! -h $(DESTDIR)$(PREFIX)/$(INSTDIR) ]; then \
+	  [ ! -d $(DESTDIR)$(PREFIX)/lib ] && install -d $(DESTDIR)$(PREFIX)/lib/; \
+	  ln -sf lib $(DESTDIR)$(PREFIX)/$(INSTDIR); \
 	fi
-	# creae the symlinks
+	# install library in INSTDIR
+	install -p $(LIBDIR)/$(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/
+	# create the symlinks
 	ln -sf  $(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/$(LIBNAME).so
 	ln -sf  $(LIBNAME).so.$(VER) $(DESTDIR)$(PREFIX)/$(INSTDIR)/$(LIBNAME).so.$(SONMVER)
 	# install conf file, $(CNFILE), in /etc/ld.so.conf.d/
